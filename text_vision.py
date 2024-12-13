@@ -18,10 +18,10 @@ import io
 
 from dotenv import load_dotenv, dotenv_values 
 load_dotenv() 
-api_key = os.getenv('GEMINI_API_KEY')
+api_key = st.secrets["GEMINI_API_KEY"]
 
 # Set up Google Cloud credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "key.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = st.secrets["private_key"]
 
 # def extract_text_from_docx(docx_path):
 #     """Extract text from a DOCX file."""
