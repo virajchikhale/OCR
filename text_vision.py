@@ -23,7 +23,7 @@ import os
 
 # Access secrets as environment variables
 api_key = os.getenv("GEMINI_API_KEY")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("VISION_API")
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("VISION_API")
 
 
 # Set up Google Cloud credentials
