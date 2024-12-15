@@ -59,6 +59,20 @@ class DataExtractor:
                 "email": "",
                 "eme_contact_name": "",
                 "eme_contact_mobile": ""
+            }},
+            "education_details": {{
+                "1": {{
+                "school_university_name": "",
+                "qualification": "",
+                "percentage_or_cgpa": "",
+                "pass_out_year": ""
+            }},
+                "2": {{
+                "school_university_name": "",
+                "qualification": "",
+                "percentage_or_cgpa": "",
+                "pass_out_year": ""
+            }}
             }}
         }}
 
@@ -71,6 +85,7 @@ class DataExtractor:
         3. Clean up any extra spaces or formatting
         4. Ensure names are properly split into first, middle, and last
         5. Return only the JSON object, no additional text
+        6. There can be muiltple education_details present in dataset adjust accordingly
         """
         
         try:

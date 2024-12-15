@@ -60,7 +60,7 @@ def extract_text_from_pdf(content):
 
     
     extractor = DataExtractor(api_key)
-
+    # print(text)
     # Extract structured data
     structured_data = extractor.extract_structured_data(text)
 

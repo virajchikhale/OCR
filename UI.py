@@ -3,13 +3,65 @@ from PIL import Image
 import pandas as pd
 from resize import resizer
 from delete_files import DeleteFiles
-from DatabaseManager import create_table, insert_candidate, fetch_candidates, search_candidates,delete_candidates
+from DatabaseManager import create_table, insert_candidate, insert_into_education, fetch_candidates, search_candidates,insert_into_references, get_candidates, get_education
 from text_vision import extract_text_from_pdf
 
 
 create_table()
-# delete_candidates()
 
+# function to get the details for search section
+def show_details(index):
+    st.markdown("---")
+    result = get_candidates(index)
+    edu_result = get_education(index)
+
+    # print(result)
+    personal_df = pd.DataFrame(result, columns=["candidate_id", "first_name", "middle_name", "last_name", "dob", "age", "gender", "passport", "mobile", "pan", "visa_status", "email","current_street", "current_city", "current_state", "current_zip", "current_country","permanent_street", "permanent_city", "permanent_state", "permanent_zip", "permanent_country","emergency_contact_name", "emergency_contact_number", "relocation_availability"])
+    edu_df = pd.DataFrame(edu_result, columns=["education_id", "candidate_id", "sr_no", "school_university_name", "qualification", "percentage_or_cgpa", "pass_out_year"])
+    new_edu_df = edu_df[["sr_no", "school_university_name", "qualification", "percentage_or_cgpa", "pass_out_year"]]
+
+    for index, personal in personal_df.iterrows():
+        st.header(f"Details for _{personal['first_name']} {personal['middle_name']} {personal['last_name']}_")
+        #permanant Address
+        st.subheader("Permannet Address:", divider=True)
+        st.write(f"Street Address: {personal['permanent_street']}")
+        col1, col2, col3, col4 = st.columns([2, 2, 2, 2])  # Adjust column widths
+        col1.write(f"City: {personal['permanent_city']}")
+        col2.write(f"State: {personal['permanent_state']}")
+        col3.write(f"Zip Code: {personal['permanent_zip']}")
+        col4.write(f"Country: {personal['permanent_country']}")
+        # Current Address
+        st.subheader("Current Address:", divider=True)
+        st.write(f"Street Address: {personal['current_street']}")
+        col1, col2, col3, col4 = st.columns([2, 2, 2, 2])  # Adjust column widths
+        col1.write(f"City: {personal['current_city']}")
+        col2.write(f"State: {personal['current_state']}")
+        col3.write(f"Zip Code: {personal['current_zip']}")
+        col4.write(f"Country: {personal['current_country']}")
+        # Personal Details
+        st.subheader("Personal Details:", divider=True)
+        col1, col2, col3 = st.columns([2, 2, 2])  # Adjust column widths
+        col1.write(f"Date or Birth: {personal['dob']}")
+        col2.write(f"Age: {personal['age']}")
+        col3.write(f"Gender: {personal['gender']}")
+        col1.write(f"Passport: {personal['passport']}")
+        col2.write(f"Mobile: {personal['mobile']}")
+        col3.write(f"PAN No: {personal['pan']}")
+        col1, col2 = st.columns([2, 2])  # Adjust column widths
+        col1.write(f"Email: {personal['email']}")
+        col2.write(f"Visa: {personal['visa_status']}")
+        col1.write(f"Emergency Name: {personal['emergency_contact_name']}")
+        col2.write(f"Emergency Mobile: {personal['emergency_contact_number']}")
+
+        # Educational Details
+        st.subheader("Educational Details:", divider=True)
+        st.dataframe(new_edu_df)
+
+
+
+
+
+    st.markdown("---")
 
 # Initialize session state for storing candidate data
 if "candidate_data" not in st.session_state:
@@ -18,12 +70,33 @@ if "candidate_data" not in st.session_state:
 # Title of the app
 st.title("Interview Form Data Extractor")
 
-# Sidebar description
-# st.sidebar.header("Options")
-# st.sidebar.write("Upload interview forms and extract candidate details.")
+
+st.subheader("Search Candidates")
+search_placeholder = st.empty()
+search_keyword = search_placeholder.text_input("Enter a name or Email to search", key="search_input")
+
+
+# Search section
+if search_keyword:
+    results = search_candidates(search_keyword)
+    if results:
+        st.write(f"Search Results for '{search_keyword}':")
+        search_df = pd.DataFrame(results, columns=["reference_id","candidate_id", "name", "mobile", "email"])
+        # st.dataframe(search_df)
+        for index, row in search_df.iterrows():
+            col1, col2, col3, col4 = st.columns([2, 2, 2, 1])  # Adjust column widths
+            col1.write(f"<div style='padding: 10px;'>{row['name']}</div>", unsafe_allow_html=True)
+            col2.write(f"<div style='padding: 10px;'>{row['email']}</div>", unsafe_allow_html=True)
+            col3.write(f"<div style='padding: 10px;'>{row['mobile']}</div>", unsafe_allow_html=True)
+            
+            # Add a button in the last column for each row
+            if col4.button("Details", key=f"view_{index}"):
+                show_details(row['candidate_id'])
+    else:
+        st.write(f"No candidates found for '{search_keyword}'.")
 
 # File uploader for interview form
-uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
+uploaded_file = st.file_uploader("Upload a PDF file to add candidate", type="pdf")
     
 if uploaded_file is not None:
     # Display the file name
@@ -36,33 +109,23 @@ if uploaded_file is not None:
             structured_data = extract_text_from_pdf(pdf_content)
             st.success("PDF file uploaded successfully!")
             st.write(f"File size: {len(pdf_content)} bytes")
+            first_name = structured_data['name']['first']
+            middle_name = structured_data['name']['middle']
+            last_name = structured_data['name']['last']
+            st.write(f"PDF Uploaded: {first_name+" "+middle_name+" "+last_name} ")
+            # st.text_area("Extracted Text", value=structured_data, height=200)
             print(structured_data)
     except Exception as e:
         st.error(f"An error occurred while reading the file: {e}")
-    # delete_candidates()
-# if uploaded_file:
-#     # Display the uploaded image
-#     st.subheader("Uploaded Interview Form")
 
-#     processor = CandidateFormProcessor('temp/output_fixed_size.jpg')
-#     structured_data = processor.process_form()
-
-#     Extract text using OCR (Tesseract)
-#     st.subheader("Extracted Data")
     try:
-        # st.text_area("Extracted Text", value=structured_data, height=200)
-
         
         st.subheader("Correct or Add Candidate Details")
-        # name = st.text_input("Name")
-        # age = st.number_input("Age", min_value=18, max_value=100, step=1)
-        # position = st.text_input("Position Applied For")
-        # contact = st.text_input("Contact Number")
-
 
         first_name = structured_data['name']['first']
         middle_name = structured_data['name']['middle']
         last_name = structured_data['name']['last']
+        name = first_name+" "+last_name
         # perm_address = structured_data['permanent_address']
         perm_street = structured_data['permanent_address']['street_address']
         perm_city = structured_data['permanent_address']['city']
@@ -88,63 +151,44 @@ if uploaded_file is not None:
         email = structured_data['personal_details']['email']
         emergency_name = structured_data['personal_details']['eme_contact_name']
         emergency_mobile = structured_data['personal_details']['eme_contact_mobile']
-        
+        relocation_availability = True
+
+        education = structured_data['education_details']
+
+        # adding candidate details to the Database
         if st.button("Add Candidate to Database"):
-            insert_candidate(first_name or "N/A", middle_name or "N/A", last_name or "N/A", dob or "N/A", age or "N/A", mobile or "N/A", gender or "N/A", email, emergency_name, emergency_mobile)
-            st.success("Candidate details added to the database!")
+            Candidates = (first_name or "N/A", middle_name or "N/A", last_name or "N/A", dob or "N/A", age or "N/A", gender or "N/A", passport or "N/A", mobile or "N/A", pan or "N/A", visa or "N/A", email or "N/A", curr_street or "N/A", curr_city or "N/A", curr_state or "N/A", curr_zip or "N/A", curr_country or "N/A", perm_street or "N/A", perm_city or "N/A", perm_state or "N/A", perm_zip or "N/A", perm_country or "N/A", emergency_name or "N/A", emergency_mobile or "N/A", relocation_availability or "N/A")
+            # print(Candidates)
+            insert_candidate(Candidates)       
+            # adding candidate educational details to the Database
+            for i in range(0,len(education)):
+                sr_no = i+1
+                school_university_name = education[str(i+1)]['school_university_name']
+                qualification = education[str(i+1)]['qualification']
+                percentage_or_cgpa = education[str(i+1)]['percentage_or_cgpa']
+                pass_out_year = education[str(i+1)]['pass_out_year']
+                education_detail = (sr_no or "N/A", school_university_name or "N/A", qualification or "N/A", percentage_or_cgpa or "N/A", pass_out_year or "N/A")
+                insert_into_education(education_detail)
+
+            #Updating the reference table 
+            refer = (name,mobile,email)
+            insert_into_references(refer)
+            # st.success("Candidate details added to the database!")
     except Exception as e:
         st.error("Error extracting data from the image. Please try again.",e)
 
-    
 
-# st.subheader("Candidate Details Table")
-# df = pd.DataFrame(structured_data)
-# st.dataframe(df)
 
-st.subheader("Search Candidates")
-search_placeholder = st.empty()
-search_keyword = search_placeholder.text_input("Enter a name or position to search", key="search_input")
-
-if search_keyword:
-    results = search_candidates(search_keyword)
-    if results:
-        st.write(f"Search Results for '{search_keyword}':")
-        search_df = pd.DataFrame(results, columns=["id","first_name", "middle_name", "last_name", "dob", "age", "gender", "passport_status", "mobile", "pan", "visa_status", "email", "emergency_contact_name", "emergency_contact_mobile"])
-        for index, roww in search_df.iterrows():
-            col1, col2 = st.columns([3, 2])
-            with col1:
-                st.write(f"**{roww['first_name']} - {roww['last_name']} - {roww['mobile']} - {roww['email']}")
-            with col2:
-                if st.button(f"More Info", key=f"search_{roww['id']}"):
-                    st.info(f"Details for **{roww['first_name']}** **{roww['last_name']}**:\n\n"
-                            f"- **Age:** {roww['age']}\n"
-                            f"- **Gender:** {roww['gender']}\n"
-                            f"- **Date of Birth:** {roww['dob']}\n"
-                            f"- **emergency contact name:** {roww['emergency_contact_name']}\n"
-                            f"- **emergency contact mobile:** {roww['emergency_contact_mobile']}")
-        # st.dataframe(df)
-    else:
-        st.write(f"No candidates found for '{search_keyword}'.")
-
+# Details of all the candidates form reference table
 st.subheader("Candidate Details Table")
 candidates = fetch_candidates()
 
 if candidates:
-    df = pd.DataFrame(candidates, columns=["id","first_name", "middle_name", "last_name", "dob", "age", "gender", "passport_status", "mobile", "pan", "visa_status", "email", "emergency_contact_name", "emergency_contact_mobile"])
-    new_df = df[["id","first_name","last_name","mobile","email"]]
-    # for index, row in df.iterrows():
-    #         col1, col2 = st.columns([3, 2])
-    #         with col1:
-    #             st.write(f"**{row['first_name']} - {row['last_name']} - {row['mobile']} - {row['email']}")
-    #         with col2:
-    #             if st.button(f"More Info", key=f"search_{row['id']}"):
-    #                 st.info(f"Details for **{row['mobile']}**:\n\n"
-    #                         f"- **Age:** {row['email']}\n"
-    #                         f"- **Position:** {row['gender']}\n"
-    #                         f"- **Contact:** {row['pan']}")
+    df = pd.DataFrame(candidates, columns=["reference_id","candidate_id", "name", "mobile", "email"])
+    new_df = df[["reference_id","name", "mobile", "email"]]
     st.dataframe(new_df)
 else:
     st.write("No candidate details found.")
 
 # Footer
-st.write("Developed using Streamlit and Tesseract OCR")
+st.write("Developed using Streamlit, Gemini API and Google Vision API")
