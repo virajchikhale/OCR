@@ -66,14 +66,51 @@ class DataExtractor:
                 "qualification": "",
                 "percentage_or_cgpa": "",
                 "pass_out_year": ""
+            }}
             }},
-                "2": {{
-                "school_university_name": "",
-                "qualification": "",
-                "percentage_or_cgpa": "",
-                "pass_out_year": ""
+            "training_details": {{
+                "1": {{
+                "program": "",
+                "contents": "",
+                "organized_by": "",
+                "duration": ""
             }}
+            }},
+            "certifications_details": {{
+                "1": {{
+                "certification": "",
+                "duration": ""
             }}
+            }},
+            "family_details": {{"1": {{
+                "relation":"father_mother"
+                "occupation_profession": "",
+                "resident_loction": ""
+            }},"2": {{
+                "relation":"brother"
+                "occupation_profession": "",
+                "resident_loction": ""
+            }},"3": {{
+                "relation":"sister"
+                "occupation_profession": "",
+                "resident_loction": ""
+            }},"4": {{
+                "relation":"spouse"
+                "occupation_profession": "",
+                "resident_loction": ""
+            }},"5": {{
+                "relation":"children"
+                "occupation_profession": "",
+                "resident_loction": ""
+            }}
+            }},
+            "reference_details": {{
+                "1": {{
+                "name": "",
+                "designation": "",
+                "contact_no": ""
+            }}
+            }},
         }}
 
         Input Data:
@@ -85,7 +122,10 @@ class DataExtractor:
         3. Clean up any extra spaces or formatting
         4. Ensure names are properly split into first, middle, and last
         5. Return only the JSON object, no additional text
-        6. There can be muiltple education_details present in dataset adjust accordingly
+        6. There can be muiltple education_details, training_details, certifications_details and reference_details present in dataset adjust accordingly
+        7. if any member form family_details has no occupation_profession or is blank fill it with N/A
+        8. there are chance that training_details, certifications_details may be confusing so focus on these
+        9. below this line "16. Please list the technical or professional certification you completed" is certifications_details and above is training_details
         """
         
         try:

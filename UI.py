@@ -3,7 +3,7 @@ from PIL import Image
 import pandas as pd
 from resize import resizer
 from delete_files import DeleteFiles
-from DatabaseManager import create_table, insert_candidate, insert_into_education, fetch_candidates, search_candidates,insert_into_references, get_candidates, get_education
+from DatabaseManager import create_table, insert_candidate, insert_into_education, fetch_candidates, search_candidates, get_candidates, get_education,insert_into_training, insert_into_certifications, insert_into_family, insert_into_reference, get_train,get_certification,get_family,get_reference
 from text_vision import extract_text_from_pdf
 
 
@@ -14,11 +14,18 @@ def show_details(index):
     st.markdown("---")
     result = get_candidates(index)
     edu_result = get_education(index)
+    train_result = get_train(index)
+    certification_result = get_certification(index)
+    family_result = get_family(index)
+    reference_result = get_reference(index)
 
     # print(result)
     personal_df = pd.DataFrame(result, columns=["candidate_id", "first_name", "middle_name", "last_name", "dob", "age", "gender", "passport", "mobile", "pan", "visa_status", "email","current_street", "current_city", "current_state", "current_zip", "current_country","permanent_street", "permanent_city", "permanent_state", "permanent_zip", "permanent_country","emergency_contact_name", "emergency_contact_number", "relocation_availability"])
-    edu_df = pd.DataFrame(edu_result, columns=["education_id", "candidate_id", "sr_no", "school_university_name", "qualification", "percentage_or_cgpa", "pass_out_year"])
-    new_edu_df = edu_df[["sr_no", "school_university_name", "qualification", "percentage_or_cgpa", "pass_out_year"]]
+    new_edu_df = pd.DataFrame(edu_result, columns=["sr_no", "school_university_name", "qualification", "percentage_or_cgpa", "pass_out_year"])
+    new_train_df = pd.DataFrame(train_result, columns=["program", "contents", "organized_by", "duration"])
+    new_cer_df = pd.DataFrame(certification_result, columns=["sr_no", "certification", "duration"])
+    new_fam_df = pd.DataFrame(family_result, columns=["relation", "occupation_profession", "resident_location"])
+    new_ref_df =pd.DataFrame(reference_result, columns=["name", "designation", "contact_no"])
 
     for index, personal in personal_df.iterrows():
         st.header(f"Details for _{personal['first_name']} {personal['middle_name']} {personal['last_name']}_")
@@ -57,6 +64,22 @@ def show_details(index):
         st.subheader("Educational Details:", divider=True)
         st.dataframe(new_edu_df)
 
+        # Training Details
+        st.subheader("Training Details:", divider=True)
+        st.dataframe(new_train_df)
+
+        # Certification Details
+        st.subheader("Certification Details:", divider=True)
+        st.dataframe(new_cer_df)
+        
+        # Family Details
+        st.subheader("Family Details:", divider=True)
+        st.dataframe(new_fam_df)
+        
+        # References Details
+        st.subheader("References Details:", divider=True)
+        st.dataframe(new_ref_df)
+
 
 
 
@@ -81,11 +104,14 @@ if search_keyword:
     results = search_candidates(search_keyword)
     if results:
         st.write(f"Search Results for '{search_keyword}':")
-        search_df = pd.DataFrame(results, columns=["reference_id","candidate_id", "name", "mobile", "email"])
+        search_df = pd.DataFrame(results, columns=["candidate_id", "first_name", "middle_name", "last_name", "dob", "age", "gender", "passport", "mobile", "pan", "visa_status", "email",
+            "current_street", "current_city", "current_state", "current_zip", "current_country",
+            "permanent_street", "permanent_city", "permanent_state", "permanent_zip", "permanent_country",
+            "emergency_contact_name", "emergency_contact_number", "relocation_availability"])
         # st.dataframe(search_df)
         for index, row in search_df.iterrows():
-            col1, col2, col3, col4 = st.columns([2, 2, 2, 1])  # Adjust column widths
-            col1.write(f"<div style='padding: 10px;'>{row['name']}</div>", unsafe_allow_html=True)
+            col1, col2, col3, col4 = st.columns([2, 3, 1, 1])  # Adjust column widths
+            col1.write(f"<div style='padding: 10px;'>{row['first_name']} {row['middle_name']} {row['last_name']}</div>", unsafe_allow_html=True)
             col2.write(f"<div style='padding: 10px;'>{row['email']}</div>", unsafe_allow_html=True)
             col3.write(f"<div style='padding: 10px;'>{row['mobile']}</div>", unsafe_allow_html=True)
             
@@ -154,6 +180,10 @@ if uploaded_file is not None:
         relocation_availability = True
 
         education = structured_data['education_details']
+        training = structured_data['training_details']
+        certifications = structured_data['certifications_details']
+        family = structured_data['family_details']
+        reference = structured_data['reference_details']
 
         # adding candidate details to the Database
         if st.button("Add Candidate to Database"):
@@ -170,9 +200,42 @@ if uploaded_file is not None:
                 education_detail = (sr_no or "N/A", school_university_name or "N/A", qualification or "N/A", percentage_or_cgpa or "N/A", pass_out_year or "N/A")
                 insert_into_education(education_detail)
 
-            #Updating the reference table 
-            refer = (name,mobile,email)
-            insert_into_references(refer)
+            
+            # adding candidate training details to the Database
+            for i in range(0,len(training)):
+                program = training[str(i+1)]['program']
+                contents = training[str(i+1)]['contents']
+                organized_by = training[str(i+1)]['organized_by']
+                duration = training[str(i+1)]['duration']
+                training_detail = (program or "N/A", contents or "N/A", organized_by or "N/A", duration or "N/A")
+                insert_into_training(training_detail)
+
+            
+            # adding candidate certifications details to the Database
+            for i in range(0,len(certifications)):
+                sr_no = i+1
+                certification = certifications[str(i+1)]['certification']
+                duration = certifications[str(i+1)]['duration']
+                certifications_detail = (sr_no or "N/A", certification or "N/A", duration or "N/A")
+                insert_into_certifications(certifications_detail)  
+            
+            # adding candidate Family details to the Database   
+            for i in range(0,len(family)):
+                relation = family[str(i+1)]['relation']
+                occupation_profession = family[str(i+1)]['occupation_profession']
+                resident_loction = family[str(i+1)]['resident_loction']
+                family_detail = (relation or "N/A", occupation_profession or "N/A", resident_loction or "N/A")
+                insert_into_family(family_detail) 
+            
+            # adding candidate reference details to the Database   
+            for i in range(0,len(reference)):
+                name = reference[str(i+1)]['name']
+                designation = reference[str(i+1)]['designation']
+                contact_no = reference[str(i+1)]['contact_no']
+                reference_detail = (name or "N/A", designation or "N/A", contact_no or "N/A")
+                insert_into_reference(reference_detail)   
+  
+
             # st.success("Candidate details added to the database!")
     except Exception as e:
         st.error("Error extracting data from the image. Please try again.",e)
@@ -184,8 +247,11 @@ st.subheader("Candidate Details Table")
 candidates = fetch_candidates()
 
 if candidates:
-    df = pd.DataFrame(candidates, columns=["reference_id","candidate_id", "name", "mobile", "email"])
-    new_df = df[["reference_id","name", "mobile", "email"]]
+    df = pd.DataFrame(candidates, columns=["candidate_id", "first_name", "middle_name", "last_name", "dob", "age", "gender", "passport", "mobile", "pan", "visa_status", "email",
+            "current_street", "current_city", "current_state", "current_zip", "current_country",
+            "permanent_street", "permanent_city", "permanent_state", "permanent_zip", "permanent_country",
+            "emergency_contact_name", "emergency_contact_number", "relocation_availability"])
+    new_df = df[["candidate_id","first_name", "last_name", "mobile", "email"]]
     st.dataframe(new_df)
 else:
     st.write("No candidate details found.")

@@ -35,11 +35,6 @@ def extract_text_from_pdf(content):
     """Extract text from a PDF file using Google Cloud Vision API."""
     client = vision.ImageAnnotatorClient()
 
-    # with io.open(pdf_path, 'rb') as pdf_file:
-    #     content = pdf_file.read()
-    # content = pdf_file.read()
-    # Create a Vision API request for PDF
-    # Note the changes in this part
     request = {
         'requests': [{
             'input_config': types.InputConfig(content=content, mime_type='application/pdf'),
@@ -65,21 +60,3 @@ def extract_text_from_pdf(content):
     structured_data = extractor.extract_structured_data(text)
 
     return structured_data
-
-# def extract_text(file_path):
-#     """Extract text from a DOCX or PDF file."""
-#     if file_path.endswith('.docx'):
-#         return extract_text_from_docx(file_path)
-#     elif file_path.endswith('.pdf'):
-#         return extract_text_from_pdf(file_path)
-#     else:
-#         raise ValueError("Unsupported file format. Only .docx and .pdf are supported.")
-
-# if __name__ == "__main__":
-#     file_path = "temp/OCR.pdf"
-#     try:
-#         text = extract_text(file_path)
-#         print("Extracted Text:")
-#         print(text)
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
