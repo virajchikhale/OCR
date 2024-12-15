@@ -1,17 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-The function `extract_text_from_pdf` extracts text from a PDF file using the Google Cloud Vision API
-and then extracts structured data from the extracted text using a `DataExtractor` class.
-
-:param content: The `content` parameter in the `extract_text_from_pdf` function is the content of
-the PDF file that you want to extract text from using the Google Cloud Vision API. This content
-should be passed as a byte string. You can read the content of a PDF file and pass it to this
-function
-:return: The function `extract_text_from_pdf` is returning structured data extracted from a PDF file
-using the Google Cloud Vision API and a DataExtractor class.
-"""
-
-
+import streamlit as st
 import os
 from google.cloud import vision
 from google.cloud.vision_v1 import types
@@ -23,10 +10,16 @@ import io
 
 from dotenv import load_dotenv, dotenv_values 
 load_dotenv() 
-api_key = os.getenv('GEMINI_API_KEY')
+# api_key = st.secrets["GEMINI_API_KEY"]
+import os
+
+# Access secrets as environment variables
+api_key = os.getenv("GEMINI_API_KEY")
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("VISION_API")
+
 
 # Set up Google Cloud credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "key.json"
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = st.secrets["private_key"]
 
 
 def extract_text_from_pdf(content):
