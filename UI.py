@@ -1,4 +1,14 @@
 import streamlit as st
+# """
+#     The code is a Streamlit web application that allows users to upload PDF files containing candidate
+#     interview forms, extract data from the PDF, display candidate details, search for candidates, and
+#     store candidate information in a database.
+
+#     :param index: The `index` parameter in the `show_details` function is used to fetch details of a
+#     specific candidate from the database. It is used to retrieve information such as personal details,
+#     educational details, training details, certification details, family details, and reference details
+#     for a particular candidate based on their index in
+# """
 from PIL import Image
 import pandas as pd
 from resize import resizer
@@ -122,123 +132,126 @@ if search_keyword:
         st.write(f"No candidates found for '{search_keyword}'.")
 
 # File uploader for interview form
-uploaded_file = st.file_uploader("Upload a PDF file to add candidate", type="pdf")
-    
-if uploaded_file is not None:
-    # Display the file name
-    st.write(f"Uploaded file: {uploaded_file.name}")
-    
-    # Read and display the content of the PDF file (optional)
-    try:
-        with st.spinner("Reading the PDF..."):
-            pdf_content = uploaded_file.read()
-            structured_data = extract_text_from_pdf(pdf_content)
-            st.success("PDF file uploaded successfully!")
-            st.write(f"File size: {len(pdf_content)} bytes")
-            first_name = structured_data['name']['first']
-            middle_name = structured_data['name']['middle']
-            last_name = structured_data['name']['last']
-            st.write(f"PDF Uploaded: {first_name+" "+middle_name+" "+last_name} ")
-            # st.text_area("Extracted Text", value=structured_data, height=200)
-            print(structured_data)
-    except Exception as e:
-        st.error(f"An error occurred while reading the file: {e}")
+# uploaded_file = st.file_uploader("Upload a PDF file to add candidate", type="pdf")
+uploaded_files = st.file_uploader("Upload multiple PDFs", type="pdf", accept_multiple_files=True)
 
-    try:
+if st.button("Add Candidates to Database"):
+    if uploaded_files:
+        for uploaded_file in uploaded_files: 
+            # Display the file name
+            st.write(f"Uploaded file: {uploaded_file.name}")
+            
+            # Read and display the content of the PDF file (optional)
+            try:
+                with st.spinner("Reading the PDF..."):
+                    pdf_content = uploaded_file.read()
+                    structured_data = extract_text_from_pdf(pdf_content)
+                    first_name = structured_data['name']['first']
+                    middle_name = structured_data['name']['middle']
+                    last_name = structured_data['name']['last']
+                    st.success(f"Candidate Added: {first_name+" "+middle_name+" "+last_name} ")
+                    # st.write(f"File size: {len(pdf_content)} bytes")
+                    # st.write(f"PDF Uploaded: {first_name+" "+middle_name+" "+last_name} ")
+                    # st.text_area("Extracted Text", value=structured_data, height=200)
+                    print(structured_data)
+            except Exception as e:
+                st.error(f"An error occurred while reading the file: {e}")
+
+            try:
+                
+                # st.subheader("Add Candidate Details")
+
+                first_name = structured_data['name']['first']
+                middle_name = structured_data['name']['middle']
+                last_name = structured_data['name']['last']
+                name = first_name+" "+last_name
+                # perm_address = structured_data['permanent_address']
+                perm_street = structured_data['permanent_address']['street_address']
+                perm_city = structured_data['permanent_address']['city']
+                perm_state = structured_data['permanent_address']['state']
+                perm_zip = structured_data['permanent_address']['zip_code']
+                perm_country = structured_data['permanent_address']['country']
+                # curr_address = structured_data['current_address']
+                curr_street = structured_data['current_address']['street_address']
+                curr_city = structured_data['current_address']['city']
+                curr_state = structured_data['current_address']['state']
+                curr_zip = structured_data['current_address']['zip_code']
+                curr_country = structured_data['current_address']['country']     
+                # perm_country = structured_data['permanent_address']['country']
+
+                # personal = structured_data['personal_details']
+                dob = structured_data['personal_details']['DoB']
+                age = structured_data['personal_details']['age']
+                gender = structured_data['personal_details']['gender']
+                passport = structured_data['personal_details']['passport']
+                mobile = structured_data['personal_details']['mobile']
+                pan = structured_data['personal_details']['pan']
+                visa = structured_data['personal_details']['visa']
+                email = structured_data['personal_details']['email']
+                emergency_name = structured_data['personal_details']['eme_contact_name']
+                emergency_mobile = structured_data['personal_details']['eme_contact_mobile']
+                relocation_availability = True
+
+                education = structured_data['education_details']
+                training = structured_data['training_details']
+                certifications = structured_data['certifications_details']
+                family = structured_data['family_details']
+                reference = structured_data['reference_details']
+
+                # adding candidate details to the Database
+                # if st.button("Add Candidate to Database"):
+                Candidates = (first_name or "N/A", middle_name or "N/A", last_name or "N/A", dob or "N/A", age or "N/A", gender or "N/A", passport or "N/A", mobile or "N/A", pan or "N/A", visa or "N/A", email or "N/A", curr_street or "N/A", curr_city or "N/A", curr_state or "N/A", curr_zip or "N/A", curr_country or "N/A", perm_street or "N/A", perm_city or "N/A", perm_state or "N/A", perm_zip or "N/A", perm_country or "N/A", emergency_name or "N/A", emergency_mobile or "N/A", relocation_availability or "N/A")
+                # print(Candidates)
+                insert_candidate(Candidates)       
+                # adding candidate educational details to the Database
+                for i in range(0,len(education)):
+                    sr_no = i+1
+                    school_university_name = education[str(i+1)]['school_university_name']
+                    qualification = education[str(i+1)]['qualification']
+                    percentage_or_cgpa = education[str(i+1)]['percentage_or_cgpa']
+                    pass_out_year = education[str(i+1)]['pass_out_year']
+                    education_detail = (sr_no or "N/A", school_university_name or "N/A", qualification or "N/A", percentage_or_cgpa or "N/A", pass_out_year or "N/A")
+                    insert_into_education(education_detail)
+
+                
+                # adding candidate training details to the Database
+                for i in range(0,len(training)):
+                    program = training[str(i+1)]['program']
+                    contents = training[str(i+1)]['contents']
+                    organized_by = training[str(i+1)]['organized_by']
+                    duration = training[str(i+1)]['duration']
+                    training_detail = (program or "N/A", contents or "N/A", organized_by or "N/A", duration or "N/A")
+                    insert_into_training(training_detail)
+
+                
+                # adding candidate certifications details to the Database
+                for i in range(0,len(certifications)):
+                    sr_no = i+1
+                    certification = certifications[str(i+1)]['certification']
+                    duration = certifications[str(i+1)]['duration']
+                    certifications_detail = (sr_no or "N/A", certification or "N/A", duration or "N/A")
+                    insert_into_certifications(certifications_detail)  
+                    
+                # adding candidate Family details to the Database   
+                for i in range(0,len(family)):
+                    relation = family[str(i+1)]['relation']
+                    occupation_profession = family[str(i+1)]['occupation_profession']
+                    resident_loction = family[str(i+1)]['resident_loction']
+                    family_detail = (relation or "N/A", occupation_profession or "N/A", resident_loction or "N/A")
+                    insert_into_family(family_detail) 
+                
+                # adding candidate reference details to the Database   
+                for i in range(0,len(reference)):
+                    name = reference[str(i+1)]['name']
+                    designation = reference[str(i+1)]['designation']
+                    contact_no = reference[str(i+1)]['contact_no']
+                    reference_detail = (name or "N/A", designation or "N/A", contact_no or "N/A")
+                    insert_into_reference(reference_detail)   
         
-        st.subheader("Correct or Add Candidate Details")
 
-        first_name = structured_data['name']['first']
-        middle_name = structured_data['name']['middle']
-        last_name = structured_data['name']['last']
-        name = first_name+" "+last_name
-        # perm_address = structured_data['permanent_address']
-        perm_street = structured_data['permanent_address']['street_address']
-        perm_city = structured_data['permanent_address']['city']
-        perm_state = structured_data['permanent_address']['state']
-        perm_zip = structured_data['permanent_address']['zip_code']
-        perm_country = structured_data['permanent_address']['country']
-        # curr_address = structured_data['current_address']
-        curr_street = structured_data['current_address']['street_address']
-        curr_city = structured_data['current_address']['city']
-        curr_state = structured_data['current_address']['state']
-        curr_zip = structured_data['current_address']['zip_code']
-        curr_country = structured_data['current_address']['country']     
-        # perm_country = structured_data['permanent_address']['country']
-
-        # personal = structured_data['personal_details']
-        dob = structured_data['personal_details']['DoB']
-        age = structured_data['personal_details']['age']
-        gender = structured_data['personal_details']['gender']
-        passport = structured_data['personal_details']['passport']
-        mobile = structured_data['personal_details']['mobile']
-        pan = structured_data['personal_details']['pan']
-        visa = structured_data['personal_details']['visa']
-        email = structured_data['personal_details']['email']
-        emergency_name = structured_data['personal_details']['eme_contact_name']
-        emergency_mobile = structured_data['personal_details']['eme_contact_mobile']
-        relocation_availability = True
-
-        education = structured_data['education_details']
-        training = structured_data['training_details']
-        certifications = structured_data['certifications_details']
-        family = structured_data['family_details']
-        reference = structured_data['reference_details']
-
-        # adding candidate details to the Database
-        if st.button("Add Candidate to Database"):
-            Candidates = (first_name or "N/A", middle_name or "N/A", last_name or "N/A", dob or "N/A", age or "N/A", gender or "N/A", passport or "N/A", mobile or "N/A", pan or "N/A", visa or "N/A", email or "N/A", curr_street or "N/A", curr_city or "N/A", curr_state or "N/A", curr_zip or "N/A", curr_country or "N/A", perm_street or "N/A", perm_city or "N/A", perm_state or "N/A", perm_zip or "N/A", perm_country or "N/A", emergency_name or "N/A", emergency_mobile or "N/A", relocation_availability or "N/A")
-            # print(Candidates)
-            insert_candidate(Candidates)       
-            # adding candidate educational details to the Database
-            for i in range(0,len(education)):
-                sr_no = i+1
-                school_university_name = education[str(i+1)]['school_university_name']
-                qualification = education[str(i+1)]['qualification']
-                percentage_or_cgpa = education[str(i+1)]['percentage_or_cgpa']
-                pass_out_year = education[str(i+1)]['pass_out_year']
-                education_detail = (sr_no or "N/A", school_university_name or "N/A", qualification or "N/A", percentage_or_cgpa or "N/A", pass_out_year or "N/A")
-                insert_into_education(education_detail)
-
-            
-            # adding candidate training details to the Database
-            for i in range(0,len(training)):
-                program = training[str(i+1)]['program']
-                contents = training[str(i+1)]['contents']
-                organized_by = training[str(i+1)]['organized_by']
-                duration = training[str(i+1)]['duration']
-                training_detail = (program or "N/A", contents or "N/A", organized_by or "N/A", duration or "N/A")
-                insert_into_training(training_detail)
-
-            
-            # adding candidate certifications details to the Database
-            for i in range(0,len(certifications)):
-                sr_no = i+1
-                certification = certifications[str(i+1)]['certification']
-                duration = certifications[str(i+1)]['duration']
-                certifications_detail = (sr_no or "N/A", certification or "N/A", duration or "N/A")
-                insert_into_certifications(certifications_detail)  
-            
-            # adding candidate Family details to the Database   
-            for i in range(0,len(family)):
-                relation = family[str(i+1)]['relation']
-                occupation_profession = family[str(i+1)]['occupation_profession']
-                resident_loction = family[str(i+1)]['resident_loction']
-                family_detail = (relation or "N/A", occupation_profession or "N/A", resident_loction or "N/A")
-                insert_into_family(family_detail) 
-            
-            # adding candidate reference details to the Database   
-            for i in range(0,len(reference)):
-                name = reference[str(i+1)]['name']
-                designation = reference[str(i+1)]['designation']
-                contact_no = reference[str(i+1)]['contact_no']
-                reference_detail = (name or "N/A", designation or "N/A", contact_no or "N/A")
-                insert_into_reference(reference_detail)   
-  
-
-            # st.success("Candidate details added to the database!")
-    except Exception as e:
-        st.error("Error extracting data from the image. Please try again.",e)
+                # st.success("Candidate details added to the database!")
+            except Exception as e:
+                st.error("Error extracting data from the image. Please try again.",e)
 
 
 

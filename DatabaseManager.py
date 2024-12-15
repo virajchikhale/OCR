@@ -115,6 +115,8 @@ def create_table():
     conn.commit()
     conn.close()
 
+
+
 # Function to insert candidate details
 def insert_candidate(data):
     conn = connect_db()
@@ -160,7 +162,6 @@ def insert_into_education(data):
     ''', data)
     conn.commit()
     conn.close()
-
 
 # Function to insert certification details
 def insert_into_certifications(data):
@@ -251,7 +252,6 @@ def get_education(candidates_id):
     conn.close()
     return rows
 
-
 # Function to fetch Training details
 def get_train(candidates_id):
     # print(candidates_id)
@@ -261,7 +261,6 @@ def get_train(candidates_id):
     rows = cursor.fetchall()
     conn.close()
     return rows
-
 
 # Function to fetch Certification details
 def get_certification(candidates_id):
@@ -273,7 +272,6 @@ def get_certification(candidates_id):
     conn.close()
     return rows
 
-    
 # Function to fetch Family details
 def get_family(candidates_id):
     # print(candidates_id)
@@ -283,8 +281,6 @@ def get_family(candidates_id):
     rows = cursor.fetchall()
     conn.close()
     return rows
-
-
     
 # Function to fetch reference details
 def get_reference(candidates_id):
