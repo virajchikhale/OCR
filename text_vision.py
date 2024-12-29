@@ -19,6 +19,7 @@ from google.protobuf.json_format import MessageToDict
 from docx import Document
 from data_extractor import DataExtractor
 import io
+import streamlit as st
 
 
 from dotenv import load_dotenv, dotenv_values 
