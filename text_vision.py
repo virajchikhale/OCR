@@ -27,7 +27,7 @@ load_dotenv()
 api_key = os.getenv('GEMINI_API_KEY')
 
 # Set up Google Cloud credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = st.secrets['key']
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = st.secrets['GOOGLE_APPLICATION_CREDENTIALS']
 
 
 def extract_text_from_pdf(content):
