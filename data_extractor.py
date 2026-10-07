@@ -1,8 +1,6 @@
 
-from PIL import Image
 import google.generativeai as genai
 import json
-import os
 
 
 class DataExtractor:

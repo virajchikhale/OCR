@@ -9,10 +9,7 @@ import streamlit as st
 #     educational details, training details, certification details, family details, and reference details
 #     for a particular candidate based on their index in
 # """
-from PIL import Image
 import pandas as pd
-from resize import resizer
-from delete_files import DeleteFiles
 from DatabaseManager import create_table, insert_candidate, insert_into_education, fetch_candidates, search_candidates, get_candidates, get_education,insert_into_training, insert_into_certifications, insert_into_family, insert_into_reference, get_train,get_certification,get_family,get_reference
 from text_vision import extract_text_from_pdf
 

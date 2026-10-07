@@ -15,14 +15,11 @@ using the Google Cloud Vision API and a DataExtractor class.
 import os
 from google.cloud import vision
 from google.cloud.vision_v1 import types
-from google.protobuf.json_format import MessageToDict
-from docx import Document
 from data_extractor import DataExtractor
-import io
 import streamlit as st
 
 
-from dotenv import load_dotenv, dotenv_values 
+from dotenv import load_dotenv 
 load_dotenv() 
 api_key = os.getenv('GEMINI_API_KEY')
 
